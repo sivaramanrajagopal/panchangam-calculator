@@ -1,11 +1,12 @@
-import PanchangamCalculator from './components/PanchangamCalculator.jsx'
+import React from 'react';
+import PanchangamCalculator from './components/PanchangamCalculator';
 
 function App() {
   return (
-    <div className="min-h-screen bg-orange-50 py-8 flex justify-center items-start">
+    <div className="min-h-screen w-full flex justify-center items-center bg-amber-50">
       <PanchangamCalculator />
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

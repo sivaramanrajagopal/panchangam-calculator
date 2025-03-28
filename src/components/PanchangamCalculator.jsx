@@ -29,6 +29,7 @@ const PanchangamCalculator = () => {
     nakshatraNumber: "நட்சத்திர எண்",
     rashiNumber: "ராசி எண்",
     dhruvaNumber: "துருவ எண்",
+    lagnaNumber: "லக்ன எண்",
     parikaram: "பரிகாரம்",
     parikarams: "⚠️ பரிகாரங்கள்",
     compatibility: "இணக்கம்",
@@ -56,6 +57,7 @@ const PanchangamCalculator = () => {
     "துலாம்", "விருச்சிகம்", "தனுசு", "மகரம்", "கும்பம்", "மீனம்"
   ];
 
+  // Lagna to its durva value mapping
   const lagnaDhruvaValues = {
     "மேஷம்": "5",
     "ரிஷபம்": "7",
@@ -130,20 +132,27 @@ const PanchangamCalculator = () => {
     const janmaIndex = nakshatras.indexOf(janmaNakshatra);
     const currentIndex = nakshatras.indexOf(currentNakshatra);
     
+    // Position calculation - handling edge cases correctly
     const position = (currentIndex - janmaIndex + 27) % 27 + 1;
     const nakshatraNumber1 = janmaIndex + 1;
     const nakshatraNumber2 = currentIndex + 1;
     
-    // Define benefic, malefic, and neutral stars based on the document
+    // Define benefic, malefic, and neutral stars
     const beneficStars = [2, 4, 8, 9];
     const maleficStars = [3, 5, 7];
     const neutralStars = [1, 6];
+    const chandrashtamaNakshatra = 17; // The 17th nakshatra from birth star is highly malefic
     
     let status = '';
     let isAuspicious = false;
     let compatibilityInfo = '';
+    const isChandrashtamaNakshatra = position === chandrashtamaNakshatra;
 
-    if (beneficStars.includes(position)) {
+    if (isChandrashtamaNakshatra) {
+      status = 'சந்திராஷ்டம நட்சத்திரம் (17-வது நிலை) - மிகவும் அசுபம்';
+      isAuspicious = false;
+      compatibilityInfo = 'ஜென்ம நட்சத்திரத்திலிருந்து 17-வது நட்சத்திரம் - தவிர்க்கவும்';
+    } else if (beneficStars.includes(position)) {
       status = 'சுபகரமான தாரை (Benefic - Shubha Tara)';
       isAuspicious = true;
       compatibilityInfo = 'மிகவும் நல்லது - புதிய முயற்சிகளுக்கு ஏற்றது';
@@ -171,7 +180,8 @@ const PanchangamCalculator = () => {
       nakshatraNumber1,
       nakshatraNumber2,
       compatibilityInfo,
-      parikaram
+      parikaram,
+      isChandrashtamaNakshatra
     };
   };
 
@@ -181,21 +191,25 @@ const PanchangamCalculator = () => {
     const janmaIndex = rashis.indexOf(janmaRashi);
     const currentIndex = rashis.indexOf(currentRashi);
     
-    const position = (currentIndex - janmaIndex + 12) % 12 + 1;
+    // Improved position calculation - ensuring positions are always 1-12
+    // This handles the edge case where current rashi is same as birth rashi correctly
+    const position = ((currentIndex - janmaIndex + 12) % 12) + 1;
     const rashiNumber1 = janmaIndex + 1;
     const rashiNumber2 = currentIndex + 1;
     
-    // Benefic and malefic positions based on document
+    // Define benefic and malefic positions
     const beneficSigns = [1, 3, 6, 7, 10, 11];
     const dayMalefic = [4, 8, 12];
     const nightMalefic = [2, 5, 9];
     
-    const maleficSigns = values.timeOfDay === 'day' ? dayMalefic : nightMalefic;
+    const maleficSigns = timeOfDay === 'day' ? dayMalefic : nightMalefic;
+    
+    // Check for Chandrashtama - 8th house from birth rashi
+    const isChandrashtama = position === 8;
     
     let status = '';
     let isAuspicious = false;
     let compatibilityInfo = '';
-    const isChandrashtama = position === 8;
     
     if (isChandrashtama) {
       status = 'சந்திராஷ்டமம் (8-ம் இடம்)';
@@ -206,9 +220,9 @@ const PanchangamCalculator = () => {
       isAuspicious = true;
       compatibilityInfo = 'மிகவும் நல்லது - அனைத்து நல்ல காரியங்களுக்கும் ஏற்றது';
     } else if (maleficSigns.includes(position)) {
-      status = `அசுபகரமான இடம் (Malefic - ${values.timeOfDay === 'day' ? 'பகல்' : 'இரவு'} நேரத்தில் தவிர்க்கவும்)`;
+      status = `அசுபகரமான இடம் (Malefic - ${timeOfDay === 'day' ? 'பகல்' : 'இரவு'} நேரத்தில் தவிர்க்கவும்)`;
       isAuspicious = false;
-      compatibilityInfo = `${values.timeOfDay === 'day' ? 'பகல்' : 'இரவு'} நேரத்தில் தவிர்க்கவும் - முக்கியமான பணிகளுக்கு ஏற்றதல்ல`;
+      compatibilityInfo = `${timeOfDay === 'day' ? 'பகல்' : 'இரவு'} நேரத்தில் தவிர்க்கவும் - முக்கியமான பணிகளுக்கு ஏற்றதல்ல`;
     } else {
       status = 'நடுநிலை இடம் (Neutral)';
       isAuspicious = true;
@@ -247,12 +261,19 @@ const PanchangamCalculator = () => {
     const thithiIndex = thithis.indexOf(values.thithi) + 1;
     const varamIndex = varams.indexOf(values.varam) + 1;
     const nakshatraIndex = nakshatras.indexOf(values.nakshatra) + 1;
+    
+    // Get lagna durva value
     const dhruvaValue = parseInt(lagnaDhruvaValues[values.lagna] || '0');
     
-    const sum = thithiIndex + varamIndex + nakshatraIndex + dhruvaValue;
+    // Get lagna number (1-12) based on its position in rashis array
+    // This is the critical addition for correct panchagam calculation
+    const lagnaIndex = rashis.indexOf(values.lagna) + 1;
+    
+    // Sum includes both lagna number and durva value
+    const sum = thithiIndex + varamIndex + nakshatraIndex + lagnaIndex + dhruvaValue;
     const remainder = sum % 9 || 9; // If remainder is 0, use 9 instead
     
-    // Define favorable remainders based on document
+    // Define favorable remainders
     const favorableRemainders = [1, 4, 7, 9]; // These are good panchakam values
     const isAuspicious = favorableRemainders.includes(remainder);
     
@@ -292,7 +313,9 @@ const PanchangamCalculator = () => {
       thithiIndex,
       varamIndex,
       nakshatraIndex,
+      lagnaIndex, // Added lagna number
       dhruvaValue,
+      sum, // Total sum for debugging
       parikaramInfo,
       compatibilityInfo
     };
@@ -384,7 +407,7 @@ const PanchangamCalculator = () => {
     results.panchagam?.isAuspicious;
 
   return (
-    <div className="w-full flex justify-center"> {/* New wrapper div */}
+    <div className="flex justify-center w-full max-w-md mx-auto">
      <div className="bg-yellow-50 rounded-lg shadow-lg overflow-hidden max-w-md mx-auto" style={{margin: '0 auto'}}>
       <div className="bg-orange-500 p-4 text-center">
         <h1 className="text-2xl font-bold text-white">{translations.title}</h1>
@@ -563,6 +586,7 @@ const PanchangamCalculator = () => {
                       </td>
                       <td className="px-3 py-2 text-sm text-gray-500">
                         {results.taraBala?.position} ({results.taraBala?.isAuspicious ? translations.benefic : translations.malefic})
+                        {results.taraBala?.isChandrashtamaNakshatra && ' ⚠️'}
                       </td>
                     </tr>
                     <tr>
@@ -663,7 +687,7 @@ const PanchangamCalculator = () => {
                   </div>
                 </div>
                 
-                {/* Panchagam Details */}
+                {/* Panchagam Details - Updated to show Lagna Number */}
                 <div className="p-2 rounded bg-gray-50">
                   <div className="font-medium text-gray-800 mb-1">{translations.pachakam} - மிகுதி எண்: {results.panchagam?.remainder}</div>
                   <div className="text-sm grid grid-cols-2 gap-2">
@@ -671,9 +695,11 @@ const PanchangamCalculator = () => {
                       <p><strong>திதி எண்:</strong> {results.panchagam?.thithiIndex}</p>
                       <p><strong>வாரம் எண்:</strong> {results.panchagam?.varamIndex}</p>
                       <p><strong>{translations.nakshatraNumber}:</strong> {results.panchagam?.nakshatraIndex}</p>
+                      <p><strong>{translations.lagnaNumber}:</strong> {results.panchagam?.lagnaIndex}</p>
                     </div>
                     <div className="text-gray-600">
                       <p><strong>{translations.dhruvaNumber}:</strong> {results.panchagam?.dhruvaValue}</p>
+                      <p><strong>கூட்டுத்தொகை:</strong> {results.panchagam?.sum}</p>
                       <p className={results.panchagam?.isAuspicious ? "text-green-600" : "text-red-600"}>
                         <strong>{translations.compatibility}:</strong> {results.panchagam?.compatibilityInfo}
                       </p>
