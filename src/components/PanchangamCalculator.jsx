@@ -41,7 +41,8 @@ const PanchangamCalculator = () => {
     hideDetails: "விவரங்களை மறைக்க",
     benefic: "சுபம்",
     malefic: "அசுபம்",
-    position: "நிலை"
+    position: "நிலை",
+    remainder: "மிகுதி"
   };
 
   const nakshatras = [
@@ -57,7 +58,6 @@ const PanchangamCalculator = () => {
     "துலாம்", "விருச்சிகம்", "தனுசு", "மகரம்", "கும்பம்", "மீனம்"
   ];
 
-  // Lagna to its durva value mapping
   const lagnaDhruvaValues = {
     "மேஷம்": "5",
     "ரிஷபம்": "7",
@@ -137,10 +137,14 @@ const PanchangamCalculator = () => {
     const nakshatraNumber1 = janmaIndex + 1;
     const nakshatraNumber2 = currentIndex + 1;
     
-    // Define benefic, malefic, and neutral stars
-    const beneficStars = [2, 4, 8, 9];
-    const maleficStars = [3, 5, 7];
-    const neutralStars = [1, 6];
+    // Calculate remainder when divided by 9
+    const remainder = position % 9 || 9; // If remainder is 0, use 9 instead
+    
+    // Define benefic, malefic, and neutral stars based on remainder
+    const beneficRemainders = [2, 4, 8, 9]; // Benefic (Shubha)
+    const maleficRemainders = [3, 5, 7];    // Malefic (Ashubha)
+    const neutralRemainders = [1, 6];      // Neutral (Samata)
+    
     const chandrashtamaNakshatra = 17; // The 17th nakshatra from birth star is highly malefic
     
     let status = '';
@@ -152,14 +156,14 @@ const PanchangamCalculator = () => {
       status = 'சந்திராஷ்டம நட்சத்திரம் (17-வது நிலை) - மிகவும் அசுபம்';
       isAuspicious = false;
       compatibilityInfo = 'ஜென்ம நட்சத்திரத்திலிருந்து 17-வது நட்சத்திரம் - தவிர்க்கவும்';
-    } else if (beneficStars.includes(position)) {
+    } else if (beneficRemainders.includes(remainder)) {
       status = 'சுபகரமான தாரை (Benefic - Shubha Tara)';
       isAuspicious = true;
       compatibilityInfo = 'மிகவும் நல்லது - புதிய முயற்சிகளுக்கு ஏற்றது';
-    } else if (maleficStars.includes(position)) {
+    } else if (maleficRemainders.includes(remainder)) {
       status = 'அசுபகரமான தாரை (Malefic - Ashubha Tara)';
       compatibilityInfo = 'தவிர்க்கவும் - முக்கியமான பணிகளுக்கு ஏற்றதல்ல';
-    } else if (neutralStars.includes(position)) {
+    } else if (neutralRemainders.includes(remainder)) {
       status = 'நடுநிலை தாரை (Neutral - Samata Tara)';
       isAuspicious = true;
       compatibilityInfo = 'பரவாயில்லை - அன்றாட பணிகளுக்கு ஏற்றது';
@@ -176,6 +180,7 @@ const PanchangamCalculator = () => {
     return { 
       isAuspicious,
       position,
+      remainder,
       status,
       nakshatraNumber1,
       nakshatraNumber2,
@@ -191,18 +196,47 @@ const PanchangamCalculator = () => {
     const janmaIndex = rashis.indexOf(janmaRashi);
     const currentIndex = rashis.indexOf(currentRashi);
     
-    // Improved position calculation - ensuring positions are always 1-12
-    // This handles the edge case where current rashi is same as birth rashi correctly
+    // Calculate position from birth rashi to current rashi (1-12)
     const position = ((currentIndex - janmaIndex + 12) % 12) + 1;
     const rashiNumber1 = janmaIndex + 1;
     const rashiNumber2 = currentIndex + 1;
     
-    // Define benefic and malefic positions
-    const beneficSigns = [1, 3, 6, 7, 10, 11];
-    const dayMalefic = [4, 8, 12];
-    const nightMalefic = [2, 5, 9];
+    // Calculate remainder when divided by 9
+    // If remainder is 0, use 9 instead
+    let remainder = position % 9 || 9;
     
-    const maleficSigns = timeOfDay === 'day' ? dayMalefic : nightMalefic;
+    // For positions 10, 11, 12, use remainders 1, 2, 3 respectively
+    if (position === 10) remainder = 1;
+    if (position === 11) remainder = 2;
+    if (position === 12) remainder = 3;
+    
+    // Define position meanings in Tamil
+    const positionMeanings = {
+      1: "தேக சௌக்கியம்", // Deha sowkiyam (Body wellness)
+      2: "தன ஹானி", // Danahaani (Loss of wealth)
+      3: "திரவ்ய லாபம்", // Dhravya laabam (Gain of wealth)
+      4: "ரோக பயம்", // Roha bayam (Fear of illness)
+      5: "கார்ய விகல்பம்", // Kaarya vikalpam (Work-related issues)
+      6: "சத்ரு நாசம்", // Chatrunaasam (Destruction of enemies)
+      7: "சௌக்ய வ்ருத்தி", // Sowkya vruddi (Increase in happiness)
+      8: "ரோக வ்ருத்தி", // Roha vruddi (Increase in illness)
+      9: "கார்ய தாமதம்", // Kaarya tamadam (Delay in work)
+      10: "உத்யோக வ்ருத்தி", // Voodyoga vruddi (Career growth)
+      11: "இஷ்ட சித்தி", // Ishta siddi (Fulfillment of desires)
+      12: "தன விரயம்" // Dana virayam (Waste of wealth)
+    };
+    
+    // Define benefic positions (good)
+    const beneficPositions = [1, 3, 6, 7, 10, 11];
+    
+    // Define malefic positions (bad)
+    const maleficPositions = [4, 8, 12];
+    
+    // Define medium positions
+    const mediumPositions = [2, 5, 9];
+    
+    // Get the meaning for the current position
+    const positionMeaning = positionMeanings[position] || "";
     
     // Check for Chandrashtama - 8th house from birth rashi
     const isChandrashtama = position === 8;
@@ -210,22 +244,28 @@ const PanchangamCalculator = () => {
     let status = '';
     let isAuspicious = false;
     let compatibilityInfo = '';
+    let strengthLevel = '';
     
     if (isChandrashtama) {
-      status = 'சந்திராஷ்டமம் (8-ம் இடம்)';
+      status = 'சந்திராஷ்டமம் (8-ம் இடம்) - ' + positionMeaning;
       isAuspicious = false;
+      strengthLevel = 'இல்லை'; // Illai (No)
       compatibilityInfo = 'மிகவும் அசுபம் - எல்லா நிகழ்வுகளையும் தவிர்க்கவும்';
-    } else if (beneficSigns.includes(position)) {
-      status = 'சுபகரமான இடம் (Benefic)';
+    } else if (beneficPositions.includes(position)) {
+      status = 'சுபகரமான இடம் (' + position + ') - ' + positionMeaning;
       isAuspicious = true;
+      strengthLevel = 'உண்டு'; // Undu (Yes)
       compatibilityInfo = 'மிகவும் நல்லது - அனைத்து நல்ல காரியங்களுக்கும் ஏற்றது';
-    } else if (maleficSigns.includes(position)) {
-      status = `அசுபகரமான இடம் (Malefic - ${timeOfDay === 'day' ? 'பகல்' : 'இரவு'} நேரத்தில் தவிர்க்கவும்)`;
+    } else if (maleficPositions.includes(position)) {
+      status = 'அசுபகரமான இடம் (' + position + ') - ' + positionMeaning;
       isAuspicious = false;
-      compatibilityInfo = `${timeOfDay === 'day' ? 'பகல்' : 'இரவு'} நேரத்தில் தவிர்க்கவும் - முக்கியமான பணிகளுக்கு ஏற்றதல்ல`;
-    } else {
-      status = 'நடுநிலை இடம் (Neutral)';
-      isAuspicious = true;
+      strengthLevel = 'இல்லை'; // Illai (No)
+      compatibilityInfo = 'தவிர்க்கவும் - முக்கியமான பணிகளுக்கு ஏற்றதல்ல';
+    } else if (mediumPositions.includes(position)) {
+      // Medium positions
+      status = 'நடுநிலை இடம் (' + position + ') - ' + positionMeaning;
+      isAuspicious = timeOfDay === 'night'; // Consider medium positions auspicious only at night
+      strengthLevel = 'மத்திமம்'; // Mathimam (Medium)
       compatibilityInfo = 'பரவாயில்லை - சாதாரண செயல்களுக்கு ஏற்றது';
     }
     
@@ -241,9 +281,12 @@ const PanchangamCalculator = () => {
       strength: isAuspicious ? 100 : 0, 
       isChandrashtama,
       position,
+      remainder,
       rashiNumber1,
       rashiNumber2,
       status,
+      positionMeaning,
+      strengthLevel,
       compatibilityInfo,
       parikaram
     };
@@ -406,312 +449,344 @@ const PanchangamCalculator = () => {
     results.chandraBala?.isAuspicious && 
     results.panchagam?.isAuspicious;
 
-  return (
-    <div className="flex justify-center w-full max-w-md mx-auto">
-     <div className="bg-yellow-50 rounded-lg shadow-lg overflow-hidden max-w-md mx-auto" style={{margin: '0 auto'}}>
-      <div className="bg-orange-500 p-4 text-center">
-        <h1 className="text-2xl font-bold text-white">{translations.title}</h1>
-        <h2 className="text-white text-lg">{translations.subtitle}</h2>
+  // Render remedies section conditionally
+  const renderRemedies = () => {
+    const parikarams = getParikarams();
+    
+    if (parikarams.length === 0) {
+      return null;
+    }
+    
+    return (
+      <div className="mb-4">
+        <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+          <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
+          {translations.parikarams}
+        </h3>
+        
+        <div className="p-3 bg-red-50 rounded-lg text-sm text-red-800">
+          <ul className="space-y-1 list-disc list-inside">
+            {parikarams.map((parikaram, index) => (
+              <li key={index}>{parikaram}</li>
+            ))}
+          </ul>
+        </div>
       </div>
+    );
+  };
 
-      <div className="p-6">
-        <div className="grid grid-cols-1 gap-4">
-          <SelectField
-            label={translations.birthStar}
-            name="janmaNakshatra"
-            value={values.janmaNakshatra}
-            options={nakshatras}
-            onChange={handleChange}
-            icon={<Star className="w-5 h-5 text-yellow-500" />}
-          />
-          
-          <SelectField
-            label={translations.nakshatra}
-            name="nakshatra"
-            value={values.nakshatra}
-            options={nakshatras}
-            onChange={handleChange}
-            icon={<Star className="w-5 h-5 text-yellow-500" />}
-          />
-          
-          <SelectField
-            label={translations.birthMoon}
-            name="janmaRashi"
-            value={values.janmaRashi}
-            options={rashis}
-            onChange={handleChange}
-            icon={<Moon className="w-5 h-5 text-blue-500" />}
-          />
-          
-          <SelectField
-            label={translations.currentMoon}
-            name="currentRashi"
-            value={values.currentRashi}
-            options={rashis}
-            onChange={handleChange}
-            icon={<Moon className="w-5 h-5 text-blue-500" />}
-          />
-          
-          <SelectField
-            label={translations.thithi}
-            name="thithi"
-            value={values.thithi}
-            options={thithis}
-            onChange={handleChange}
-            icon={<Calendar className="w-5 h-5 text-green-500" />}
-          />
-          
-          <SelectField
-            label={translations.varam}
-            name="varam"
-            value={values.varam}
-            options={varams}
-            onChange={handleChange}
-            icon={<Calendar className="w-5 h-5 text-green-500" />}
-          />
-          
-          <SelectField
-            label={translations.lagna}
-            name="lagna"
-            value={values.lagna}
-            options={lagnas}
-            onChange={handleChange}
-            icon={<Calendar className="w-5 h-5 text-green-500" />}
-          />
-          
-          <RadioGroup
-            label={translations.timeOfDay}
-            name="timeOfDay"
-            value={values.timeOfDay}
-            options={{ day: translations.day, night: translations.night }}
-            onChange={handleChange}
-            icon={<Clock className="w-5 h-5 text-blue-500" />}
-          />
-
-          <div className="flex space-x-2 mt-2">
-            <button 
-              onClick={handleCalculate} 
-              className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded flex items-center justify-center"
-              disabled={!values.janmaNakshatra || !values.nakshatra || !values.janmaRashi || !values.currentRashi}
-            >
-              {translations.calculate}
-            </button>
-            <button 
-              onClick={handleReset} 
-              className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded flex items-center justify-center"
-            >
-              {translations.reset}
-            </button>
-        </div>
+  return (
+    <div className="w-full max-w-md mx-auto px-2 sm:px-4 lg:px-6">
+      <div className="bg-yellow-50 rounded-lg shadow-lg overflow-hidden w-full">
+        <div className="bg-orange-500 p-4 text-center">
+          <h1 className="text-xl sm:text-2xl font-bold text-white break-words whitespace-normal">
+            {translations.title}
+          </h1>
+          <h2 className="text-base sm:text-lg text-white break-words whitespace-normal">
+            {translations.subtitle}
+          </h2>
         </div>
 
-        {results && (
-          <div className="mt-6 p-4 bg-white rounded-lg shadow border border-yellow-200">
-            {/* Input Summary - Kept as is but collapsible */}
-            <div className="mb-4">
-              <div className="flex justify-between items-center cursor-pointer" onClick={() => setShowDetails(!showDetails)}>
-                <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                  <Info className="w-5 h-5 text-blue-500 mr-2" />
-                  {translations.inputSummary}
-                </h3>
-                {showDetails ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+        <div className="p-6">
+          <div className="grid grid-cols-1 gap-4">
+            <SelectField
+              label={translations.birthStar}
+              name="janmaNakshatra"
+              value={values.janmaNakshatra}
+              options={nakshatras}
+              onChange={handleChange}
+              icon={<Star className="w-5 h-5 text-yellow-500" />}
+            />
+            
+            <SelectField
+              label={translations.nakshatra}
+              name="nakshatra"
+              value={values.nakshatra}
+              options={nakshatras}
+              onChange={handleChange}
+              icon={<Star className="w-5 h-5 text-yellow-500" />}
+            />
+            
+            <SelectField
+              label={translations.birthMoon}
+              name="janmaRashi"
+              value={values.janmaRashi}
+              options={rashis}
+              onChange={handleChange}
+              icon={<Moon className="w-5 h-5 text-blue-500" />}
+            />
+            
+            <SelectField
+              label={translations.currentMoon}
+              name="currentRashi"
+              value={values.currentRashi}
+              options={rashis}
+              onChange={handleChange}
+              icon={<Moon className="w-5 h-5 text-blue-500" />}
+            />
+            
+            <SelectField
+              label={translations.thithi}
+              name="thithi"
+              value={values.thithi}
+              options={thithis}
+              onChange={handleChange}
+              icon={<Calendar className="w-5 h-5 text-green-500" />}
+            />
+            
+            <SelectField
+              label={translations.varam}
+              name="varam"
+              value={values.varam}
+              options={varams}
+              onChange={handleChange}
+              icon={<Calendar className="w-5 h-5 text-green-500" />}
+            />
+            
+            <SelectField
+              label={translations.lagna}
+              name="lagna"
+              value={values.lagna}
+              options={lagnas}
+              onChange={handleChange}
+              icon={<Calendar className="w-5 h-5 text-green-500" />}
+            />
+            
+            <RadioGroup
+              label={translations.timeOfDay}
+              name="timeOfDay"
+              value={values.timeOfDay}
+              options={{ day: translations.day, night: translations.night }}
+              onChange={handleChange}
+              icon={<Clock className="w-5 h-5 text-blue-500" />}
+            />
+
+            <div className="flex space-x-2 mt-2">
+              <button 
+                onClick={handleCalculate} 
+                className="flex-1 bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded flex items-center justify-center"
+                disabled={!values.janmaNakshatra || !values.nakshatra || !values.janmaRashi || !values.currentRashi}
+              >
+                {translations.calculate}
+              </button>
+              <button 
+                onClick={handleReset} 
+                className="flex-1 bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded flex items-center justify-center"
+              >
+                {translations.reset}
+              </button>
+            </div>
+          </div>
+          
+          {results && (
+            <div className="mt-6 p-4 bg-white rounded-lg shadow border border-yellow-200">
+              {/* Input Summary */}
+              <div className="mb-4">
+                <div className="flex justify-between items-center cursor-pointer" onClick={toggleDetails}>
+                  <h3 className="text-lg font-semibold text-gray-800 flex items-center">
+                    <Info className="w-5 h-5 text-blue-500 mr-2" />
+                    {translations.inputSummary}
+                  </h3>
+                  {showDetails ? <ChevronUp className="w-5 h-5" /> : <ChevronDown className="w-5 h-5" />}
+                </div>
+                
+                {showDetails && (
+                  <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
+                    <div className="grid grid-cols-2 gap-2">
+                      <div>
+                        <p><strong>{translations.birthStar}:</strong> {results.inputValues.janmaNakshatra}</p>
+                        <p><strong>{translations.nakshatra}:</strong> {results.inputValues.nakshatra}</p>
+                        <p><strong>{translations.birthMoon}:</strong> {results.inputValues.janmaRashi}</p>
+                        <p><strong>{translations.currentMoon}:</strong> {results.inputValues.currentRashi}</p>
+                      </div>
+                      <div>
+                        <p><strong>{translations.thithi}:</strong> {results.inputValues.thithi || "-"}</p>
+                        <p><strong>{translations.varam}:</strong> {results.inputValues.varam || "-"}</p>
+                        <p><strong>{translations.lagna}:</strong> {results.inputValues.lagna || "-"}</p>
+                        <p><strong>{translations.timeOfDay}:</strong> {
+                          results.inputValues.timeOfDay === 'day' ? translations.day : translations.night
+                        }</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
               
+              {/* Overall Result */}
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+                  <Award className="w-5 h-5 text-yellow-500 mr-2" />
+                  {translations.overallResult}
+                </h3>
+                
+                <div className={`p-4 rounded-lg text-center ${isOverallAuspicious ? 'bg-green-100' : 'bg-red-100'}`}>
+                  <div className="text-2xl font-bold mb-1">
+                    {isOverallAuspicious ? '✅ ' + translations.auspicious : '⚠️ ' + translations.notAuspicious}
+                  </div>
+                  <div className={`text-sm ${isOverallAuspicious ? 'text-green-800' : 'text-red-800'}`}>
+                    {isOverallAuspicious 
+                      ? 'இந்த நேரம் அனைத்து நல்ல காரியங்களுக்கும் ஏற்றது'
+                      : 'இந்த நேரத்தில் முக்கியமான முடிவுகளை தவிர்க்கவும்'}
+                  </div>
+                </div>
+              </div>
+              
+              {/* Results Table */}
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
+                  <Award className="w-5 h-5 text-yellow-500 mr-2" />
+                  {translations.summary}
+                </h3>
+                
+                <div className="overflow-hidden rounded-lg border border-gray-200">
+                  <table className="min-w-full divide-y divide-gray-200">
+                    <thead className="bg-gray-50">
+                      <tr>
+                        <th scope="col" className="px-3 py-2 text-sm font-medium text-gray-500">{translations.calculation}</th>
+                        <th scope="col" className="px-3 py-2 text-sm font-medium text-gray-500">{translations.status}</th>
+                        <th scope="col" className="px-3 py-2 text-sm font-medium text-gray-500">{translations.position}/{translations.remainder}</th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      <tr>
+                        <td className="px-3 py-2 text-sm font-medium text-gray-800">{translations.taraBala}</td>
+                        <td className="px-3 py-2 text-sm">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            results.taraBala?.isAuspicious ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {results.taraBala?.isAuspicious ? '✅' : '❌'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-sm text-gray-500">
+                          {translations.position}: {results.taraBala?.position} / {translations.remainder}: {results.taraBala?.remainder} 
+                          ({results.taraBala?.isAuspicious ? translations.benefic : translations.malefic})
+                          {results.taraBala?.isChandrashtamaNakshatra && ' ⚠️'}
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="px-3 py-2 text-sm font-medium text-gray-800">{translations.chandraBala}</td>
+                        <td className="px-3 py-2 text-sm">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            results.chandraBala?.isAuspicious ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {results.chandraBala?.isAuspicious ? '✅' : '❌'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-sm text-gray-500">
+                          {translations.position}: {results.chandraBala?.position} - {results.chandraBala?.positionMeaning}
+                          <br />
+                          <span className="font-semibold">
+                            சந்திர பலம்: {results.chandraBala?.strengthLevel}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td className="px-3 py-2 text-sm font-medium text-gray-800">{translations.pachakam}</td>
+                        <td className="px-3 py-2 text-sm">
+                          <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
+                            results.panchagam?.isAuspicious ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                          }`}>
+                            {results.panchagam?.isAuspicious ? '✅' : '❌'}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2 text-sm text-gray-500">
+                          {translations.remainder}: {results.panchagam?.remainder} ({results.panchagam?.isAuspicious ? translations.benefic : translations.malefic})
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+              
+              {/* Render remedies using the function */}
+              {renderRemedies()}
+              
+              {/* Toggle Details Button */}
+              <button
+                onClick={toggleDetails}
+                className="w-full mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded flex items-center justify-center"
+              >
+                {showDetails ? (
+                  <div className="flex items-center">
+                    <ChevronUp className="w-4 h-4 mr-1" />
+                    {translations.hideDetails}
+                  </div>
+                ) : (
+                  <div className="flex items-center">
+                    <ChevronDown className="w-4 h-4 mr-1" />
+                    {translations.showMore}
+                  </div>
+                )}
+              </button>
+              
+              {/* Detailed Results */}
               {showDetails && (
-                <div className="mt-2 p-3 bg-gray-50 rounded-lg text-sm">
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <p><strong>{translations.birthStar}:</strong> {results.inputValues.janmaNakshatra}</p>
-                      <p><strong>{translations.nakshatra}:</strong> {results.inputValues.nakshatra}</p>
-                      <p><strong>{translations.birthMoon}:</strong> {results.inputValues.janmaRashi}</p>
-                      <p><strong>{translations.currentMoon}:</strong> {results.inputValues.currentRashi}</p>
+                <div className="mt-4 space-y-3">
+                  {/* Tara Bala Details */}
+                  <div className="p-2 rounded bg-gray-50">
+                    <div className="font-medium text-gray-800 mb-1">{translations.taraBala}</div>
+                    <div className="text-sm grid grid-cols-2 gap-2">
+                      <div className="text-gray-600">
+                        <p><strong>{translations.nakshatraNumber} (ஜென்ம):</strong> {results.taraBala?.nakshatraNumber1}</p>
+                        <p><strong>{translations.nakshatraNumber} (இன்று):</strong> {results.taraBala?.nakshatraNumber2}</p>
+                        <p><strong>{translations.position}:</strong> {results.taraBala?.position}</p>
+                        <p><strong>{translations.remainder}:</strong> {results.taraBala?.remainder}</p>
+                      </div>
+                      <div className="text-gray-600">
+                        <p><strong>நிலை:</strong> {results.taraBala?.status}</p>
+                        <p className={results.taraBala?.isAuspicious ? "text-green-600" : "text-red-600"}>
+                          <strong>{translations.compatibility}:</strong> {results.taraBala?.compatibilityInfo}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <p><strong>{translations.thithi}:</strong> {results.inputValues.thithi || "-"}</p>
-                      <p><strong>{translations.varam}:</strong> {results.inputValues.varam || "-"}</p>
-                      <p><strong>{translations.lagna}:</strong> {results.inputValues.lagna || "-"}</p>
-                      <p><strong>{translations.timeOfDay}:</strong> {
-                        results.inputValues.timeOfDay === 'day' ? translations.day : translations.night
-                      }</p>
+                  </div>
+                  
+                  {/* Chandra Bala Details */}
+                  <div className="p-2 rounded bg-gray-50">
+                    <div className="font-medium text-gray-800 mb-1">{translations.chandraBala}</div>
+                    <div className="text-sm grid grid-cols-2 gap-2">
+                      <div className="text-gray-600">
+                        <p><strong>{translations.rashiNumber} (ஜென்ம):</strong> {results.chandraBala?.rashiNumber1}</p>
+                        <p><strong>{translations.rashiNumber} (இன்று):</strong> {results.chandraBala?.rashiNumber2}</p>
+                        <p><strong>{translations.position}:</strong> {results.chandraBala?.position}</p>
+                        <p><strong>பலன்:</strong> {results.chandraBala?.positionMeaning}</p>
+                        <p><strong>சந்திர பலம்:</strong> {results.chandraBala?.strengthLevel}</p>
+                      </div>
+                      <div className="text-gray-600">
+                        <p><strong>நிலை:</strong> {results.chandraBala?.status}</p>
+                        <p className={results.chandraBala?.isAuspicious ? "text-green-600" : "text-red-600"}>
+                          <strong>{translations.compatibility}:</strong> {results.chandraBala?.compatibilityInfo}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Panchagam Details */}
+                  <div className="p-2 rounded bg-gray-50">
+                    <div className="font-medium text-gray-800 mb-1">{translations.pachakam}</div>
+                    <div className="text-sm grid grid-cols-2 gap-2">
+                      <div className="text-gray-600">
+                        <p><strong>திதி எண்:</strong> {results.panchagam?.thithiIndex}</p>
+                        <p><strong>வாரம் எண்:</strong> {results.panchagam?.varamIndex}</p>
+                        <p><strong>{translations.nakshatraNumber}:</strong> {results.panchagam?.nakshatraIndex}</p>
+                        <p><strong>{translations.lagnaNumber}:</strong> {results.panchagam?.lagnaIndex}</p>
+                      </div>
+                      <div className="text-gray-600">
+                        <p><strong>{translations.dhruvaNumber}:</strong> {results.panchagam?.dhruvaValue}</p>
+                        <p><strong>கூட்டுத்தொகை:</strong> {results.panchagam?.sum}</p>
+                        <p><strong>{translations.remainder}:</strong> {results.panchagam?.remainder}</p>
+                        <p className={results.panchagam?.isAuspicious ? "text-green-600" : "text-red-600"}>
+                          <strong>{translations.compatibility}:</strong> {results.panchagam?.compatibilityInfo}
+                        </p>
+                      </div>
                     </div>
                   </div>
                 </div>
               )}
             </div>
-            
-            {/* Prominent Overall Result */}
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
-                <Award className="w-5 h-5 text-yellow-500 mr-2" />
-                {translations.overallResult}
-              </h3>
-              
-              <div className={`p-4 rounded-lg text-center ${isOverallAuspicious ? 'bg-green-100' : 'bg-red-100'}`}>
-                <div className="text-2xl font-bold mb-1">
-                  {isOverallAuspicious ? '✅ ' + translations.auspicious : '⚠️ ' + translations.notAuspicious}
-                </div>
-                <div className={`text-sm ${isOverallAuspicious ? 'text-green-800' : 'text-red-800'}`}>
-                  {isOverallAuspicious 
-                    ? 'இந்த நேரம் அனைத்து நல்ல காரியங்களுக்கும் ஏற்றது'
-                    : 'இந்த நேரத்தில் முக்கியமான முடிவுகளை தவிர்க்கவும்'}
-                </div>
-              </div>
-            </div>
-            
-            {/* Simplified Results Table */}
-            <div className="mb-4">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
-                <Award className="w-5 h-5 text-yellow-500 mr-2" />
-                {translations.summary}
-              </h3>
-              
-              <div className="overflow-hidden rounded-lg border border-gray-200">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th scope="col" className="px-3 py-2 text-sm font-medium text-gray-500">{translations.calculation}</th>
-                      <th scope="col" className="px-3 py-2 text-sm font-medium text-gray-500">{translations.status}</th>
-                      <th scope="col" className="px-3 py-2 text-sm font-medium text-gray-500">{translations.numbers}</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    <tr>
-                      <td className="px-3 py-2 text-sm font-medium text-gray-800">{translations.taraBala}</td>
-                      <td className="px-3 py-2 text-sm">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          results.taraBala?.isAuspicious ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {results.taraBala?.isAuspicious ? '✅' : '❌'}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 text-sm text-gray-500">
-                        {results.taraBala?.position} ({results.taraBala?.isAuspicious ? translations.benefic : translations.malefic})
-                        {results.taraBala?.isChandrashtamaNakshatra && ' ⚠️'}
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="px-3 py-2 text-sm font-medium text-gray-800">{translations.chandraBala}</td>
-                      <td className="px-3 py-2 text-sm">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          results.chandraBala?.isAuspicious ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {results.chandraBala?.isAuspicious ? '✅' : '❌'}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 text-sm text-gray-500">
-                        {results.chandraBala?.position} ({results.chandraBala?.isChandrashtama ? 'சந்திராஷ்டமம்' : 
-                          results.chandraBala?.isAuspicious ? translations.benefic : translations.malefic})
-                      </td>
-                    </tr>
-                    <tr>
-                      <td className="px-3 py-2 text-sm font-medium text-gray-800">{translations.pachakam}</td>
-                      <td className="px-3 py-2 text-sm">
-                        <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                          results.panchagam?.isAuspicious ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-                        }`}>
-                          {results.panchagam?.isAuspicious ? '✅' : '❌'}
-                        </span>
-                      </td>
-                      <td className="px-3 py-2 text-sm text-gray-500">
-                        {results.panchagam?.remainder} ({results.panchagam?.isAuspicious ? translations.benefic : translations.malefic})
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            
-            {/* Remedies Section */}
-            {getParikarams().length > 0 && (
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 mb-2 flex items-center">
-                  <AlertCircle className="w-5 h-5 text-red-500 mr-2" />
-                  {translations.parikarams}
-                </h3>
-                
-                <div className="p-3 bg-red-50 rounded-lg text-sm text-red-800">
-                  <ul className="space-y-1 list-disc list-inside">
-                    {getParikarams().map((parikaram, index) => (
-                      <li key={index}>{parikaram}</li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            )}
-            
-            {/* Toggle Details Button */}
-            <button
-              onClick={toggleDetails}
-              className="w-full mt-4 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-4 rounded flex items-center justify-center"
-            >
-              {showDetails ? 
-                <><ChevronUp className="w-4 h-4 mr-1" />{translations.hideDetails}</> : 
-                <><ChevronDown className="w-4 h-4 mr-1" />{translations.showMore}</>
-              }
-            </button>
-            
-            {/* Detailed Results - Shown only if expanded */}
-            {showDetails && (
-              <div className="mt-4 space-y-3">
-                {/* Tara Bala Details */}
-                <div className="p-2 rounded bg-gray-50">
-                  <div className="font-medium text-gray-800 mb-1">{translations.taraBala} - {translations.position}: {results.taraBala?.position}</div>
-                  <div className="text-sm grid grid-cols-2 gap-2">
-                    <div className="text-gray-600">
-                      <p><strong>{translations.nakshatraNumber} (ஜென்ம):</strong> {results.taraBala?.nakshatraNumber1}</p>
-                      <p><strong>{translations.nakshatraNumber} (இன்று):</strong> {results.taraBala?.nakshatraNumber2}</p>
-                    </div>
-                    <div className="text-gray-600">
-                      <p><strong>நிலை:</strong> {results.taraBala?.status}</p>
-                      <p className={results.taraBala?.isAuspicious ? "text-green-600" : "text-red-600"}>
-                        <strong>{translations.compatibility}:</strong> {results.taraBala?.compatibilityInfo}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Chandra Bala Details */}
-                <div className="p-2 rounded bg-gray-50">
-                  <div className="font-medium text-gray-800 mb-1">{translations.chandraBala} - {translations.position}: {results.chandraBala?.position}</div>
-                  <div className="text-sm grid grid-cols-2 gap-2">
-                    <div className="text-gray-600">
-                      <p><strong>{translations.rashiNumber} (ஜென்ம):</strong> {results.chandraBala?.rashiNumber1}</p>
-                      <p><strong>{translations.rashiNumber} (இன்று):</strong> {results.chandraBala?.rashiNumber2}</p>
-                    </div>
-                    <div className="text-gray-600">
-                      <p><strong>நிலை:</strong> {results.chandraBala?.status}</p>
-                      <p className={results.chandraBala?.isAuspicious ? "text-green-600" : "text-red-600"}>
-                        <strong>{translations.compatibility}:</strong> {results.chandraBala?.compatibilityInfo}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                
-                {/* Panchagam Details - Updated to show Lagna Number */}
-                <div className="p-2 rounded bg-gray-50">
-                  <div className="font-medium text-gray-800 mb-1">{translations.pachakam} - மிகுதி எண்: {results.panchagam?.remainder}</div>
-                  <div className="text-sm grid grid-cols-2 gap-2">
-                    <div className="text-gray-600">
-                      <p><strong>திதி எண்:</strong> {results.panchagam?.thithiIndex}</p>
-                      <p><strong>வாரம் எண்:</strong> {results.panchagam?.varamIndex}</p>
-                      <p><strong>{translations.nakshatraNumber}:</strong> {results.panchagam?.nakshatraIndex}</p>
-                      <p><strong>{translations.lagnaNumber}:</strong> {results.panchagam?.lagnaIndex}</p>
-                    </div>
-                    <div className="text-gray-600">
-                      <p><strong>{translations.dhruvaNumber}:</strong> {results.panchagam?.dhruvaValue}</p>
-                      <p><strong>கூட்டுத்தொகை:</strong> {results.panchagam?.sum}</p>
-                      <p className={results.panchagam?.isAuspicious ? "text-green-600" : "text-red-600"}>
-                        <strong>{translations.compatibility}:</strong> {results.panchagam?.compatibilityInfo}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
+          )}
+        </div>
       </div>
-    </div>
     </div>
   );
 };

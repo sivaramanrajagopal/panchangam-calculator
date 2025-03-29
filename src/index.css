@@ -43,24 +43,32 @@ a:hover {
 }
 
 /* Body and root element styling for proper centering */
-html, body, #root {
-  width: 100%;
-  height: 100%;
-  margin: 0;
-  padding: 0;
+html, body {
+  zoom: 1;
+  max-width: 100%;
+  overflow-x: hidden;
 }
+
 
 body {
   min-width: 320px;
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start; /* Prevent forced centering */
 }
 
+
 #root {
+  width: 100%;
+  max-width: 1200px;  /* Prevents extra-large scaling */
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  padding: 1rem;
+  justify-content: flex-start;
 }
+
 
 h1 {
   font-size: 3.2em;
